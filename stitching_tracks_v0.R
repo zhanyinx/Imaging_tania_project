@@ -14,7 +14,11 @@ library(plot3D)
 library(reshape2)
 library(plotly)
 
-###Global options
+###Global options (you can touch)
+####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
+dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Corrected_trajectories/PGK_G8_A11_B3_F6_SingleCells/2h_movies/20190716_F6_2h_30s_m1_s1/" #set the filepath to files you are intested in
+fileno = 3 # if there is more than one file ending in ".csv", please choose here which one to use
+
 trackColumn = 7 #corresponds to column with TRACKID information 
 timeColumn = 1 # corresponds to column with time position information
 posColumns = 2:4 #columns correpsonding to the x,y,z position
@@ -30,14 +34,15 @@ t_dist_inchan = 100 # threshold to penalize distance within the same channel bet
 t_dist_time = 1 # threshold to penalize distance in time between tracks in the same channel
 numtrack = 0 # threshold to decide on the minimum length of track that should be included
 
+##end global options
+
+
+##do not touch below if you are not aware!
+
 ###Import data file and make it useful for working in R (this could be prettier)
-####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
-dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Corrected_trajectories/PGK_G8_A11_B3_F6_SingleCells/2h_movies/20190716_F6_2h_30s_m1_s1/" #set the filepath to files you are intested in
 filelist = list.files(path=dirpath, pattern=".csv")
-fileno = 3 # if there is more than one file ending in ".csv", please choose here which one to use
 filename = filelist[fileno]
 traj <- read.csv(file = paste(dirpath,filename, sep=""), sep = ",", header = TRUE)
-
 #clean up some of the dataset columns
 traj$RowID <- gsub("_w[0-9]_[0-9]+_[0-9]+", "", x=traj$RowID)
 traj$Original.RowID  = gsub("cell[0-9]_w", "C", x=as.character(traj$Original.RowID))
