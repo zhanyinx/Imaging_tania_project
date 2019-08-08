@@ -5,6 +5,9 @@
 #make Shiny app
 #why does data look different when the chromatic aberration method is changed? Trend should be the same
 
+###just trying to figure out, if I know how to change something in the script and synchronise it with Gibthub
+
+
 ###Set working directory
 source("stitching_tracks_v0")
 #setwd("/tungstenfs/scratch/ggiorget/Pia/Microscopy/20190730_image_processing_Tania/")
