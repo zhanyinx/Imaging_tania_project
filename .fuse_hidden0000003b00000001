@@ -21,7 +21,7 @@ timeColumn = 1 # corresponds to column with time position information
 posColumns = 2:4 #columns correpsonding to the x,y,z position
 channelColumn = 6 #corresponds to the column assigning the channel
 #### SET FOR EVERY NEW DATASET!!! ####
-tactual = 0.5 #what is the time interval in min SET FOR EVERY NEW DATASET!!!!
+tactual = 2 #what is the time interval in min SET FOR EVERY NEW DATASET!!!!
 overlap = 0.8 #how much of a new track must be unique (not overlapping with any other track) as fraction
 #distances in microns!!!
 distthreshold = 4 #max distance between 2 tracks
