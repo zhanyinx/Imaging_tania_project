@@ -6,6 +6,9 @@
 1) We privilege the tracks where the distances across channels are small
 2) We privilege to stitch together tracks  that are close (distance btw centre of mass) within a given channels
 3) We privilege to stitch tracks that are close in time
+4) Weighting criteria of stitching added
+5) calculation of within channel and in time distances uses all the
+recorded tracks
 
 - run on all files within a directory or directories in a directory
 - save stitched tracks and id of tracks that are used for each cell
