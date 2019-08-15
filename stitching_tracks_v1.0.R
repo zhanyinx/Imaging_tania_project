@@ -2,8 +2,7 @@
 #better define input data based on filenames and clean up the data (renaming, wait for Jan)
 #figure out a smarter way to "weigh" the scores for time intervals that are longer (done)
 #write scripts for plots that we mentioned (correlation of pairwise 3D distances, etc.)
-#make Shiny app
-#why does data look different when the chromatic aberration method is changed? Trend should be the same
+#make Shiny app (done)
 
 ###Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
@@ -15,6 +14,9 @@ library(plotly)
 ###Global options (you can touch)
 ####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
 dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/Corrected_traj/2h_movies/" #set the filepath to files you are intested in
+##directory containing analysis result, must contain csv directory and pdf directory
+outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj/" 
+
 
 trackColumn = 7 #corresponds to column with TRACKID information 
 timeColumn = 1 # corresponds to column with time position information
@@ -31,8 +33,6 @@ t_dist_inchan = 1 # threshold to penalize distance within the same channel betwe
 t_dist_time = 1 # threshold to penalize distance in time between tracks in the same channel
 numtrack = 0 # threshold to decide on the minimum length of track that should be included
 
-##directory containing analysis result, must contain csv directory and pdf directory
-outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj" 
 
 sigma_threshold = 4 #how many standard deviation away from the mean of the derivative of distance with respect to time to exclude because of wrong stitching
 ##end global options
@@ -212,10 +212,10 @@ for(fileno in 1:length(filelist)){
   
   
   #Plot the tracks
-  scatter3D(channel1$x, channel1$y, channel1$z, type="l", col=2, ticktype="detailed", xlab="Position in X in µm", ylab="Position in Y in µm", zlab="Position in Z in µm", main="Trajectories of three loci over time (complete data set)")
-  scatter3D(channel2$x, channel2$y, channel2$z, type="l", col=3, add = TRUE)
-  scatter3D(channel3$x, channel3$y, channel3$z, type="l", col=4, add = TRUE)
-  legend(x="topright",legend=c("Chic","Tsix","Linx"),col=2:4,lty=c(1,1))
+  scatter3D(channel1$x, channel1$y, channel1$z, type="l", col=3, ticktype="detailed", xlab="Position in X in µm", ylab="Position in Y in µm", zlab="Position in Z in µm", main="Trajectories of three loci over time (complete data set)")
+  scatter3D(channel2$x, channel2$y, channel2$z, type="l", col=4, add = TRUE)
+  scatter3D(channel3$x, channel3$y, channel3$z, type="l", col=2, add = TRUE)
+  legend(x="topright",legend=c("Chic","Tsix","Linx"),col=c(3,4,2),lty=c(1,1))
   
   ##distances between channels  (MUST BE MOFIDIED IF NUMBER OF CHANNELS CHANGES)
   dist_c12 = dist_channels(channel1,channel2)
@@ -260,15 +260,15 @@ for(fileno in 1:length(filelist)){
   
   
   ##plotting 3D pairwise distances distances
-  plot(dist_c12,type="l",ylim=c(0,5), ylab="Distance in µm", xlab="t in min", main="2D pair-wise distances (no filter)", col=2)
-  lines(dist_c23,type="l",col=3)
-  lines(dist_c13,type="l",col=4)
-  legend(x="topright",legend=c("Chic vs Tsix","Tsix vs Linx","Chic vs Linx"),col=2:4,lty=c(1,1))
+  plot(dist_c12,type="l",ylim=c(0,5), ylab="Distance in µm", xlab="t in min", main="2D pair-wise distances (no filter)", col=3)
+  lines(dist_c23,type="l",col=4)
+  lines(dist_c13,type="l",col=2)
+  legend(x="topright",legend=c("Chic vs Tsix","Tsix vs Linx","Chic vs Linx"),col=c(3,4,2),lty=c(1,1))
   
-  plot(dist_c12_filtered,type="l",ylim=c(0,2), ylab="Distance in µm", xlab="t in min", main="2D pair-wise distances (filtering)", col=2)
-  lines(dist_c23_filtered,type="l",col=3)
-  lines(dist_c13_filtered,type="l",col=4)
-  legend(x="topright",legend=c("Chic vs Tsix","Tsix vs Linx","Chic vs Linx"),col=2:4,lty=c(1,1))
+  plot(dist_c12_filtered,type="l",ylim=c(0,2), ylab="Distance in µm", xlab="t in min", main="2D pair-wise distances (filtering)", col=3)
+  lines(dist_c23_filtered,type="l",col=4)
+  lines(dist_c13_filtered,type="l",col=2)
+  legend(x="topright",legend=c("Chic vs Tsix","Tsix vs Linx","Chic vs Linx"),col=c(3,4,2),lty=c(1,1))
   
   dev.off()
 }
