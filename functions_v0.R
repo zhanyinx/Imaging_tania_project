@@ -24,10 +24,13 @@ cm <- function(mat1){
 
 ##distance between 2 channels matching time (time column is the first column)
 dist_channels = function(channel1,channel2){
+  ncol1 = ncol(channel1)
+  ncol2 = ncol(channel2)
+  if(ncol1 != ncol2) stop("Column dimensions are different in dist_channels")
   c12 = merge(channel1,channel2,by=1)
   dist=NULL
   for(i in 1:nrow(c12)){
-    dist=c(dist,dist(t(matrix(c(c12[i,2:4],c12[i,5:7]),ncol=2))))
+    dist=c(dist,dist(t(matrix(c(c12[i,2:(ncol1)],c12[i,(ncol1+1):(2*ncol1-1)]),ncol=2))))
   }
   return(data.frame(t=c12[,1],dist=dist))
 }

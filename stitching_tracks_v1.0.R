@@ -110,6 +110,7 @@ for(fileno in 1:length(filelist)){
           
           shifted = selected_channel_count_closest - min(selected_channel_count_closest)
           order_based_on_channel_distance = as.vector(1 - (shifted)/max(shifted))
+          
           names(order_based_on_channel_distance) = names(selected_channel_count_closest) #rank based on distance with other channel
           
           remaining_tracks = traj[traj$channel==selected_channel & traj$TRACK_ID!=closest_id,] #extract remaining tracks to find rank based of distance between centre of mass (top rank = closest with the last track): this is to avoid jumps when reconstructing tracks
@@ -137,11 +138,13 @@ for(fileno in 1:length(filelist)){
           #order_based_on_dist_cm_same_channel = 1:length(distance_cms) #order based on distances btw centre of mass
           shifted = distance_cms - min(distance_cms)
           order_based_on_dist_cm_same_channel = shifted/max(shifted)
+          
           names(order_based_on_dist_cm_same_channel) = names(distance_cms)
           
           #order_based_on_dist_t_same_channel = 1:length(distance_time) #order based on distances btw time
           shifted = distance_time - min(distance_time)
           order_based_on_dist_t_same_channel = shifted/max(shifted)
+          
           names(order_based_on_dist_t_same_channel) = names(distance_time)
          
           combine_order = merge((merge(order_based_on_dist_cm_same_channel,order_based_on_channel_distance,by=0,all=TRUE)),order_based_on_dist_t_same_channel,by.x=1,by.y=0) #combine the two ordering
