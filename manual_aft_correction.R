@@ -3,18 +3,18 @@ setwd("/tungstenfs/scratch/ggiorget/Pia/github/Imaging_tania_project/")
 ####global options
 ####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
 dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/Corrected_traj/2h_movies/" #set the filepath to files you are intested in
-af_dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/manually_corrected_traj/af_matrices/"
+af_dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/manually_corrected_traj/2h_movies/af_matrices/"
 ##choose output directory for saving corrected fiels
-outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/manually_corrected_traj/" 
+outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/manually_corrected_traj/2h_movies/" 
 posColumns = 2:4
 
 
 ####functions
-mat_product = function(m, v){
+aff_trans = function(m, v, t){
   x = m[1,] %*% v
   y = m[2,] %*% v
   z = m[3,] %*% v
-  v_r = c(x,y,z)
+  v_r = c(x,y,z) - t
   return(as.vector(v_r))
 }
 
@@ -47,11 +47,11 @@ for (i in 1:length(afs)) {
     c3 = traj[traj$channel=="C3",]
     
     for (p in 1:nrow(c2)) {
-      c2[p,posColumns] = mat_product(as.matrix(afm2[,1:3]), as.numeric(c2[p,posColumns])) - as.matrix(afm2[,4])
+      c2[p,posColumns] = aff_trans(as.matrix(afm2[,1:3]), as.numeric(c2[p,posColumns]), as.matrix(afm2[,4]))
     }
 
     for (r in 1:nrow(c3)) {
-      c3[r,posColumns] = mat_product(as.matrix(afm3[,1:3]), as.numeric(c3[r,posColumns])) - as.matrix(afm3[,4])
+      c3[r,posColumns] = aff_trans(as.matrix(afm3[,1:3]), as.numeric(c3[r,posColumns]), as.matrix(afm3[,4]))
     }
     
     corrected = rbind(traj[traj$channel=="C1",], c2, c3)
