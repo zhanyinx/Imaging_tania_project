@@ -31,7 +31,7 @@ distthreshold = 4 #max distance between 2 tracks
 t_dist_chan = 1 #threshold to penalize distance between different channels at certain timepoints
 t_dist_inchan = 1 # threshold to penalize distance within the same channel between different tracks
 t_dist_time = 1 # threshold to penalize distance in time between tracks in the same channel
-numtrack = 0 # threshold to decide on the minimum length of track that should be included
+numtrack = 3 # threshold to decide on the minimum length of track that should be included
 
 
 sigma_threshold = 4 #how many standard deviation away from the mean of the derivative of distance with respect to time to exclude because of wrong stitching
@@ -99,7 +99,7 @@ for(fileno in 1:length(filelist)){
       while(k<=length(sorted_channels_and_distanceWithinChannel)){ #run on tracks
         closest_id = strsplit(names(sorted_channels_and_distanceWithinChannel[k]),"_")[[1]][2] #current longest track
         df = traj[traj$channel==selected_channel & traj$TRACK_ID==closest_id,] #extracting current longest track
-        if(sum(df$t %in% timeappo)/nrow(df)>=overlap & nrow(df)>=numtrack) { #if current longest track is not overlapping with previous longer tracks then save it, also select for tracks that are longer than three timepoints
+        if(sum(df$t %in% timeappo)/nrow(df)>=overlap & nrow(df)>=numtrack) { #if current best track is not overlapping with previous longer tracks then save it, also select for tracks that are longer than three timepoints
           df = df[df$t %in% timeappo,]
           reconstructed_tracks = rbind(reconstructed_tracks,df) #save current longest track
           timeappo = timeappo[!(timeappo %in% df$t)] #eliminate time already taken by previous tracks
@@ -108,8 +108,8 @@ for(fileno in 1:length(filelist)){
           #resort order of tracks based on closeness with previous track and the closeness with other channels: this is to avoid jumps when reconstructing tracks
           #order_based_on_channel_distance = 1:length(selected_channel_count_closest) #rank based on distance with other channel
           
-          shifted = selected_channel_count_closest - min(selected_channel_count_closest)
-          order_based_on_channel_distance = as.vector(1 - (shifted)/max(shifted))
+          shifted_1 = selected_channel_count_closest - min(selected_channel_count_closest)
+          order_based_on_channel_distance = as.vector(1 - (shifted_1)/max(shifted_1))
           
           names(order_based_on_channel_distance) = names(selected_channel_count_closest) #rank based on distance with other channel
           
@@ -136,14 +136,14 @@ for(fileno in 1:length(filelist)){
           distance_time = sort(distance_time) #sort from lowest to highest 
           
           #order_based_on_dist_cm_same_channel = 1:length(distance_cms) #order based on distances btw centre of mass
-          shifted = distance_cms - min(distance_cms)
-          order_based_on_dist_cm_same_channel = shifted/max(shifted)
+          shifted_2 = distance_cms - min(distance_cms)
+          order_based_on_dist_cm_same_channel = shifted_2/max(shifted_2)
           
           names(order_based_on_dist_cm_same_channel) = names(distance_cms)
           
           #order_based_on_dist_t_same_channel = 1:length(distance_time) #order based on distances btw time
-          shifted = distance_time - min(distance_time)
-          order_based_on_dist_t_same_channel = shifted/max(shifted)
+          shifted_3 = distance_time - min(distance_time)
+          order_based_on_dist_t_same_channel = shifted_3/max(shifted_3)
           
           names(order_based_on_dist_t_same_channel) = names(distance_time)
          

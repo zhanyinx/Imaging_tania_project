@@ -1,6 +1,4 @@
-setwd("/tungstenfs/scratch/ggiorget/zhan/2019/190627_Pia_MSD")
 library(matrixStats) #for rowProds
-
 
 
 
