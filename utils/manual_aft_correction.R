@@ -1,4 +1,4 @@
-setwd("/tungstenfs/scratch/ggiorget/Pia/github/Imaging_tania_project/")
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 ####global options
 ####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
