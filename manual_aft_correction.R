@@ -36,6 +36,7 @@ for (i in 1:length(afs)) {
 
   for (q in 1:length(files)) {
     traj = read.csv(paste(dirpath,files[q], sep=""), sep = ",", header = TRUE)
+    corrected = traj
     #clean up some of the dataset columns
     traj$RowID <- gsub("_w[0-9]_[0-9]+_[0-9]+", "", x=traj$RowID)
     traj$Original.RowID  = gsub("cell[0-9]_w", "C", x=as.character(traj$Original.RowID))
@@ -43,8 +44,8 @@ for (i in 1:length(afs)) {
     names(traj)[names(traj) == "particle"] <- "TRACK_ID"
     names(traj)[names(traj) == "RowID"] <- "Cell_no"
     
-    c2 = traj[traj$channel=="C2",]
-    c3 = traj[traj$channel=="C3",]
+    c2 = corrected[traj$channel=="C2",]
+    c3 = corrected[traj$channel=="C3",]
     
     for (p in 1:nrow(c2)) {
       c2[p,posColumns] = aff_trans(as.matrix(afm2[,1:3]), as.numeric(c2[p,posColumns]), as.matrix(afm2[,4]))
@@ -54,7 +55,7 @@ for (i in 1:length(afs)) {
       c3[r,posColumns] = aff_trans(as.matrix(afm3[,1:3]), as.numeric(c3[r,posColumns]), as.matrix(afm3[,4]))
     }
     
-    corrected = rbind(traj[traj$channel=="C1",], c2, c3)
+    corrected = rbind(corrected[traj$channel=="C1",], c2, c3)
     filename = sub(".csv", "", files[q])
     write.csv(x=corrected, file = paste(outputdir,filename, "_man_corrected.csv", sep = ""), row.names = FALSE)
   }
