@@ -2,8 +2,8 @@ setwd("/tungstenfs/scratch/ggiorget/Pia/github/Imaging_tania_project/")
 
 ####global options
 ####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
-dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/Corrected_traj/2h_movies/" #set the filepath to files you are intested in
-af_dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/manually_corrected_traj/2h_movies/af_matrices/"
+dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/Uncorrected_traj/2h_movies/" #set the filepath to files you are intested in
+af_dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/manually_corrected_traj/af_matrices_2h/"
 ##choose output directory for saving corrected fiels
 outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/manually_corrected_traj/2h_movies/" 
 posColumns = 2:4
@@ -24,7 +24,7 @@ directories = paste(outputdir, list.files(dirpath), sep="")
 lapply(directories, dir.create)
 
 afs = sub("_AF.csv", "", list.files(af_dirpath))
-filelist = list.files(path=dirpath, pattern="\\.csv$",recursive = TRUE)
+filelist = list.files(path=dirpath, pattern="\\uncorrected.csv$",recursive = TRUE)
 
 for (i in 1:length(afs)) {
   af_matrix = read.csv(paste(af_dirpath, afs[i], "_AF.csv", sep = ""))
