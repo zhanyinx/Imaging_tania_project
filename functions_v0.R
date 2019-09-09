@@ -11,7 +11,9 @@ aux.matrix <- function(data,x,y){
 
 #MSD for matrices where each row is a position in N dimension where N is the number of the columns of the matrices
 msd <- function(mat1,mat2){
-  return(rowSums((mat1-mat2)*(mat1-mat2)))
+  if(!is.null(ncol(mat1))){
+    return(rowSums((mat1-mat2)*(mat1-mat2)))
+  }else{return((mat1-mat2)*(mat1-mat2))}
 }
 
 #centre of mass function
