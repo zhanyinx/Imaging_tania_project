@@ -298,11 +298,20 @@ for(fileno in 1:length(filelist)){
   
   #velocity autocorrelation
   v12 = diff(dist_c12_filtered$dist)/diff(dist_c12_filtered$t)
+  v12 = v12[diff(dist_c12_filtered$t)==tres]
   t12 = dist_c12_filtered$t[1:(nrow(dist_c12_filtered)-1)]
+  t12 = t12[diff(dist_c12_filtered$t)==tres]
+  
   v23 = diff(dist_c23_filtered$dist)/diff(dist_c23_filtered$t)
+  v23 = v23[diff(dist_c23_filtered$t)==tres]
   t23 = dist_c23_filtered$t[1:(nrow(dist_c23_filtered)-1)]
+  t23 = t23[diff(dist_c23_filtered$t)==tres]
+  
+  
   v13 = diff(dist_c13_filtered$dist)/diff(dist_c13_filtered$t)
+  v13 = v13[diff(dist_c13_filtered$t)==tres]
   t13 = dist_c13_filtered$t[1:(nrow(dist_c13_filtered)-1)]
+  t13 = t13[diff(dist_c13_filtered$t)==tres]
   
   
   auto =  acf(v12,plot=FALSE)
