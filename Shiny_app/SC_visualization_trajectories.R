@@ -19,7 +19,7 @@ library(reshape2)
 ##global options
 timeColumn = 1 # corresponds to column with time position information
 tactual = 0.5 #minutes
-melements = 2 #minimum timepoints for msd calculation 
+melements = 10 #minimum timepoints for msd calculation 
 mdelay = 150 # maximum delay
 sigma_threshold = 4 #how many standard deviation away from the mean of the derivative of distance with respect to time to exclude because of wrong stitching
 dir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj/" 
@@ -62,7 +62,7 @@ ui <- fluidPage(
         selectInput("d_filter", "Filter (movement)",  choices=c("ON","OFF")),
         selectInput("dimension","2 or 3D", choices = c("3D","2D")),
         selectInput("cell", "Which cell:",  choices=files),
-        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD")),
+        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells")),
         selectInput("msd", "Type of MSD",  choices=c("position","distance")),
         selectInput("tres", "time resolution for MSD:",  choices=c((1:50)*tactual)),
         selectInput("autocorrelation", "Type of autocorrelation:",  choices=c("distance","velocity")),
@@ -370,43 +370,22 @@ server <- function(input, output) {
     dist_c23$type = "Tsix vs Linx"
     dist_c13$type = "Chic vs Linx"
     
-    calculate_msd_trajectory = function(data,poscolumns){
-      t = data$t
-      melted = melt(outer(t,t,'-')) 
-      disp=NULL
-      time=NULL
-      ##Running over delay
-      for(delay in (1:(mdelay/as.numeric(input$tres)))*as.numeric(input$tres)){
-        #find the timepoints whose difference correspond to the delay
-        mfix = melted[melted$value==delay,]
-        if(nrow(mfix)>=melements){
-          mat1 = data[mfix$Var1,poscolumns]
-          mat2 = data[mfix$Var2,poscolumns]
-          disp=c(disp,mean(msd(mat1,mat2)))
-          time=c(time,delay)
-        }
-
-      }
-      df = data.frame(time=time,disp=disp)
-      return(df)
-    }
-    
     if(input$msd=="position"){
       poscolumns=c(2:4)
-      df1 = calculate_msd_trajectory(channel1,poscolumns)
+      df1 = calculate_msd_trajectory(channel1,poscolumns,input$tres,mdelay,melements)
       df1$type = "Chic1"
-      df2 = calculate_msd_trajectory(channel2,poscolumns) 
+      df2 = calculate_msd_trajectory(channel2,poscolumns,input$tres,mdelay,melements) 
       df2$type = "Tsix"
-      df3 = calculate_msd_trajectory(channel3,poscolumns) 
+      df3 = calculate_msd_trajectory(channel3,poscolumns,input$tres,mdelay,melements) 
       df3$type = "Linx"
     }
     if(input$msd=="distance"){
       poscolumns=2
-      df1 = calculate_msd_trajectory(dist_c12,poscolumns) 
+      df1 = calculate_msd_trajectory(dist_c12,poscolumns,input$tres,mdelay,melements) 
       df1$type = "Chic vs Tsix"
-      df2 = calculate_msd_trajectory(dist_c23,poscolumns) 
+      df2 = calculate_msd_trajectory(dist_c23,poscolumns,input$tres,mdelay,melements) 
       df2$type = "Tsix vs Linx"
-      df3 = calculate_msd_trajectory(dist_c13,poscolumns) 
+      df3 = calculate_msd_trajectory(dist_c13,poscolumns,input$tres,mdelay,melements) 
       df3$type = "Chic vs Linx"
     }
     
@@ -422,6 +401,90 @@ server <- function(input, output) {
     })
   
   
+  pt6 <- reactive({
+    if (!(input$type=="MSD_allCells")) return(NULL)
+    
+    files_distance12 = list.files(paste0(dir,"/csv/"),pattern = "distance_MSD_c12.csv",full.names = T)
+    files_distance23 = list.files(paste0(dir,"/csv/"),pattern = "distance_MSD_c23.csv",full.names = T)
+    files_distance13 = list.files(paste0(dir,"/csv/"),pattern = "distance_MSD_c13.csv",full.names = T)
+    
+    
+    
+    data12 = read.csv(files_distance12[1])
+    for(i in 2:length(files_distance12)){
+      a = read.csv(files_distance12[i])
+      data12 = rbind(data12,a)
+    }
+    
+    data23 = read.csv(files_distance23[1])
+    for(i in 2:length(files_distance23)){
+      a = read.csv(files_distance23[i])
+      data23 = rbind(data23,a)
+    }
+    data13 = read.csv(files_distance13[1])
+    for(i in 2:length(files_distance13)){
+      a = read.csv(files_distance13[i])
+      data13 = rbind(data13,a)
+    }
+    
+    data12 = aggregate(data12$disp,list(data12$time),mean)
+    data23 = aggregate(data23$disp,list(data23$time),mean)
+    data13 = aggregate(data13$disp,list(data13$time),mean)
+    
+    data12$type = "Chic vs Tsix"
+    data23$type = "Tsix vs Linx"
+    data13$type = "Chic vs Linx"
+    
+    data = rbind(data12,data23,data13)
+    
+    ggplot(data,aes(x=Group.1, y=x,colour = type))+
+      geom_line() + labs("MSD all cells on distance filter ON") + 
+      xlab("time (minutes)") + ylab("MSD")
+  })
+  
+  
+  pt7 <- reactive({
+    if (!(input$type=="Autocorr_velocity_all_cells")) return(NULL)
+    
+    files_distance12 = list.files(paste0(dir,"/csv/"),pattern = "12velocity_autocorrelation.csv",full.names = T)
+    files_distance13 = list.files(paste0(dir,"/csv/"),pattern = "13velocity_autocorrelation.csv",full.names = T)
+    files_distance23 = list.files(paste0(dir,"/csv/"),pattern = "23velocity_autocorrelation.csv",full.names = T)
+    
+    
+    
+    data12 = read.csv(files_distance12[1])
+    for(i in 2:length(files_distance12)){
+      a = read.csv(files_distance12[i])
+      data12 = rbind(data12,a)
+    }
+    
+    data23 = read.csv(files_distance23[1])
+    for(i in 2:length(files_distance23)){
+      a = read.csv(files_distance23[i])
+      data23 = rbind(data23,a)
+    }
+    data13 = read.csv(files_distance13[1])
+    for(i in 2:length(files_distance13)){
+      a = read.csv(files_distance13[i])
+      data13 = rbind(data13,a)
+    }
+    
+    data12 = aggregate(data12$autocorr,list(data12$t),mean)
+    data23 = aggregate(data23$autocorr,list(data23$t),mean)
+    data13 = aggregate(data13$autocorr,list(data13$t),mean)
+    
+    data12$type = "Chic vs Tsix"
+    data23$type = "Tsix vs Linx"
+    data13$type = "Chic vs Linx"
+    
+    data = rbind(data12,data23,data13)
+    
+    ggplot(data,aes(x=Group.1, y=x,colour = type))+
+      geom_line() + labs("All cells on distance filter ON") + 
+      xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+  })
+  
+  
   
   # Return the requested graph
   graphInput <- reactive({
@@ -430,12 +493,14 @@ server <- function(input, output) {
            "ECDF_all_data" = pt2(),
            "Gyration_radius" = pt3(),
            "Auto_cross_pairs" = pt4(),
-           "MSD" = pt5()
+           "MSD" = pt5(),
+           "MSD_allCells" = pt6(),
+           "Autocorr_velocity_all_cells" = pt7()
     )
   })
   
   output$plotgraph <- renderPlot({ 
-    graphInput()
+    graphInput() 
   })
   
   

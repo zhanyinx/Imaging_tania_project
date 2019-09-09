@@ -1,5 +1,40 @@
 library(matrixStats) #for rowProds
+library(reshape2)
 
+##calculate msd for a trajectory
+calculate_msd_trajectory = function(data,poscolumns,tres,mdelay,melements,output=NULL){
+  t = data$t
+  melted = melt(outer(t,t,'-')) 
+  disp=NULL
+  time=NULL
+  
+  if(!is.null(output)){
+    disp_out = NULL
+    time_out =NULL
+  }
+  ##Running over delay
+  for(delay in (1:(mdelay/as.numeric(tres)))*as.numeric(tres)){
+    #find the timepoints whose difference correspond to the delay
+    mfix = melted[melted$value==delay,]
+    if(nrow(mfix)>=melements){
+      mat1 = data[mfix$Var1,poscolumns]
+      mat2 = data[mfix$Var2,poscolumns]
+      a=(msd(mat1,mat2))
+      disp=c(disp,mean(a))
+      time=c(time,delay)
+      
+      if(!is.null(output)){
+        disp_out = c(disp_out,a)
+        time_out = c(time_out,rep(delay,length(a)))
+      }
+    }
+    if(!is.null(output)){
+      write.csv(x=data.frame(time = time_out,disp = disp_out),file = output,row.names = F)
+    }
+  }
+  df = data.frame(time=time,disp=disp)
+  return(df)
+}
 
 
 #Make the auxiliary matrix from the chosen dataset using the sel_track as x and sel_ts as y and dataset=data

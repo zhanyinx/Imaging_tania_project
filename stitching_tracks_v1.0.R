@@ -24,6 +24,9 @@ posColumns = 2:4 #columns correpsonding to the x,y,z position
 channelColumn = 6 #corresponds to the column assigning the channel
 #### SET FOR EVERY NEW DATASET!!! ####
 tactual = 0.5 #what is the time interval in min SET FOR EVERY NEW DATASET!!!!
+tres = 0.5 # in silico changing resolution in time
+mdelay = 150 # maximum delay 
+melements = 10 #minimum elements for calculation of MSD
 overlap = 0.8 #how much of a new track must be unique (not overlapping with any other track) as fraction
 #distances in microns!!!
 distthreshold = 4 #max distance between 2 tracks
@@ -220,6 +223,23 @@ for(fileno in 1:length(filelist)){
   scatter3D(channel3$x, channel3$y, channel3$z, type="l", col=2, add = TRUE)
   legend(x="topright",legend=c("Chic","Tsix","Linx"),col=c(3,4,2),lty=c(1,1))
   
+  
+  #MSD of single channels
+  poscolumns=c(2:4)
+  df1 = calculate_msd_trajectory(channel1,poscolumns,tres,mdelay,melements,output = paste0(outputdir,"/csv/",gsub("/","_",filename),"_position_MSD_c1.csv"))
+  df1$type = "Chic1"
+  df2 = calculate_msd_trajectory(channel2,poscolumns,tres,mdelay,melements,output = paste0(outputdir,"/csv/",gsub("/","_",filename),"_position_MSD_c2.csv")) 
+  df2$type = "Tsix"
+  df3 = calculate_msd_trajectory(channel3,poscolumns,tres,mdelay,melements,output = paste0(outputdir,"/csv/",gsub("/","_",filename),"_position_MSD_c3.csv")) 
+  df3$type = "Linx"
+  
+  df = rbind(df1,df2,df3)
+  
+  ggplot(df,aes(x=time,y=disp,col=type)) + 
+    geom_line() +
+    xlab("time (minutes)") +
+    ylab(paste0("MSD on ","single channel")) 
+  
   ##distances between channels  (MUST BE MOFIDIED IF NUMBER OF CHANNELS CHANGES)
   dist_c12 = dist_channels(channel1,channel2)
   dist_c23 = dist_channels(channel2,channel3)
@@ -232,8 +252,6 @@ for(fileno in 1:length(filelist)){
   write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_12distances.csv"),x=dist_c12,row.names = F)
   write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_23distances.csv"),x=dist_c23,row.names = F)
   write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_13distances.csv"),x=dist_c13,row.names = F)
-  
-  
   
   ##filtering, deleting too sharping increase and decrease  (MUST BE MOFIDIED IF NUMBER OF CHANNELS CHANGES)
   #d = 2 column matrix (1 column denominator, second column numerator of derivation), threshold on sd to filter
@@ -258,6 +276,51 @@ for(fileno in 1:length(filelist)){
   write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_12distances_filtered.csv"),x=dist_c12_filtered,row.names = F)
   write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_23distances_filtered.csv"),x=dist_c23_filtered,row.names = F)
   write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_13distances_filtered.csv"),x=dist_c13_filtered,row.names = F)
+  
+  
+  
+  ##MSD on distance
+  poscolumns=2
+  df1 = calculate_msd_trajectory(dist_c12_filtered,poscolumns,tres,mdelay,melements,output = paste0(outputdir,"/csv/",gsub("/","_",filename),"_distance_MSD_c12.csv")) 
+  df1$type = "Chic vs Tsix"
+  df2 = calculate_msd_trajectory(dist_c23_filtered,poscolumns,tres,mdelay,melements,output = paste0(outputdir,"/csv/",gsub("/","_",filename),"_distance_MSD_c23.csv")) 
+  df2$type = "Tsix vs Linx"
+  df3 = calculate_msd_trajectory(dist_c13_filtered,poscolumns,tres,mdelay,melements,output = paste0(outputdir,"/csv/",gsub("/","_",filename),"_distance_MSD_c13.csv")) 
+  df3$type = "Chic vs Linx"
+  
+  df = rbind(df1,df2,df3)
+  
+  ggplot(df,aes(x=time,y=disp,col=type)) + 
+    geom_line() +
+    xlab("time (minutes)") +
+    ylab(paste0("MSD on ","distance")) 
+  
+  
+  #velocity autocorrelation
+  v12 = diff(dist_c12_filtered$dist)/diff(dist_c12_filtered$t)
+  t12 = dist_c12_filtered$t[1:(nrow(dist_c12_filtered)-1)]
+  v23 = diff(dist_c23_filtered$dist)/diff(dist_c23_filtered$t)
+  t23 = dist_c23_filtered$t[1:(nrow(dist_c23_filtered)-1)]
+  v13 = diff(dist_c13_filtered$dist)/diff(dist_c13_filtered$t)
+  t13 = dist_c13_filtered$t[1:(nrow(dist_c13_filtered)-1)]
+  
+  
+  auto =  acf(v12,plot=FALSE)
+  plot(t12[1:length(auto[[1]])]-min(t12),auto[[1]],xlab="lag (Minutes)",ylim=c(-0.5,1),ylab="Auto correlation Velocity", type="l",col=1)
+  write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_12velocity_autocorrelation.csv"),
+            x=data.frame(t=t12[1:length(auto[[1]])]-min(t12),autocorr = auto[[1]]),row.names = F)
+  
+  auto =  acf(v13,plot=FALSE)
+  points(t13[1:length(auto[[1]])]-min(t13),auto[[1]],xlab="lag (Minutes)",ylim=c(-0.5,1),ylab="Auto correlation Velocity",type="l",col=2)
+  write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_13velocity_autocorrelation.csv"),
+            x=data.frame(t=t13[1:length(auto[[1]])]-min(t13),autocorr = auto[[1]]),row.names = F)
+  
+  auto =  acf(v23,plot=FALSE)
+  points(t23[1:length(auto[[1]])]-min(t23),auto[[1]],xlab="lag (Minutes)",ylim=c(-0.5,1),ylab="Auto correlation Velocity",type="l",col=3)
+  write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_23velocity_autocorrelation.csv"),
+            x=data.frame(t=t23[1:length(auto[[1]])]-min(t23),autocorr = auto[[1]]),row.names = F)
+  
+  legend(x="topright",legend=c("Chic vs Tsix","Chic vs Linx","Tsix vs Linx"),col=c(1,2,3),lty=c(1,1))
   
   
   
