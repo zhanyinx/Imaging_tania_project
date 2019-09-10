@@ -427,9 +427,9 @@ server <- function(input, output) {
       data13 = rbind(data13,a)
     }
     
-    data12 = aggregate(data12$disp,list(data12$time),mean)
-    data23 = aggregate(data23$disp,list(data23$time),mean)
-    data13 = aggregate(data13$disp,list(data13$time),mean)
+    data12 = aggregate(data12$disp,list(data12$time),median)
+    data23 = aggregate(data23$disp,list(data23$time),median)
+    data13 = aggregate(data13$disp,list(data13$time),median)
     
     data12$type = "Chic vs Tsix"
     data23$type = "Tsix vs Linx"
