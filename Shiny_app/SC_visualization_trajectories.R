@@ -437,9 +437,9 @@ server <- function(input, output) {
       data13 = rbind(data13,a)
     }
     
-    #data12 = aggregate(data12$disp,list(data12$time),median)
-    #data23 = aggregate(data23$disp,list(data23$time),median)
-    #data13 = aggregate(data13$disp,list(data13$time),median)
+    data12 = aggregate(data12$disp,list(data12$time),median)
+    data23 = aggregate(data23$disp,list(data23$time),median)
+    data13 = aggregate(data13$disp,list(data13$time),median)
     
     data12$type = "Chic vs Tsix"
     data23$type = "Tsix vs Linx"
@@ -485,9 +485,9 @@ server <- function(input, output) {
       data13 = rbind(data13,a)
     }
     
-    data12 = aggregate(data12$autocorr,list(data12$t),mean)
-    data23 = aggregate(data23$autocorr,list(data23$t),mean)
-    data13 = aggregate(data13$autocorr,list(data13$t),mean)
+    #data12 = aggregate(data12$autocorr,list(data12$t),mean)
+    #data23 = aggregate(data23$autocorr,list(data23$t),mean)
+    #data13 = aggregate(data13$autocorr,list(data13$t),mean)
     
     data12$type = "Chic vs Tsix"
     data23$type = "Tsix vs Linx"
