@@ -63,9 +63,10 @@ ui <- fluidPage(
         selectInput("d_filter", "Filter (movement)",  choices=c("ON","OFF")),
         selectInput("dimension","2 or 3D", choices = c("3D","2D")),
         selectInput("cell", "Which cell:",  choices=files),
-        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells")),
+        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells","first_passage_time_distribution","duration_contact","duration_non_contact")),
         selectInput("msd", "Type of MSD",  choices=c("position","distance")),
         selectInput("tres", "time resolution for MSD:",  choices=c((1:50)*tactual)),
+        selectInput("dist_thresh", "Threshold on distance for contact (um):",  choices=c(0.1,(1:50)/100)),
         selectInput("autocorrelation", "Type of autocorrelation:",  choices=c("distance","velocity")),
         selectInput("ymax", "Max value in y axis:",  choices=c(1.5,(1:10)/10,1,2,2.5,3,4,5)),
         downloadButton("downloadData", "Reconstructed trajectory"),
@@ -442,7 +443,7 @@ server <- function(input, output) {
     #  geom_line() + labs("MSD all cells on distance filter ON") + 
     #  xlab("time (minutes)") + ylab("MSD")
     
-    ggplot(data,aes(x=Group.1, y=x,colour = type))+
+    ggplot(data,aes(x=time, y=disp,colour = type))+
       stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
       xlab("time (minutes)") + ylab("MSD")
     
@@ -475,9 +476,9 @@ server <- function(input, output) {
       data13 = rbind(data13,a)
     }
     
-    #data12 = aggregate(data12$autocorr,list(data12$t),mean)
-    #data23 = aggregate(data23$autocorr,list(data23$t),mean)
-    #data13 = aggregate(data13$autocorr,list(data13$t),mean)
+    data12 = aggregate(data12$autocorr,list(data12$t),mean)
+    data23 = aggregate(data23$autocorr,list(data23$t),mean)
+    data13 = aggregate(data13$autocorr,list(data13$t),mean)
     
     data12$type = "Chic vs Tsix"
     data23$type = "Tsix vs Linx"
@@ -485,13 +486,70 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    #ggplot(data,aes(x=Group.1, y=x,colour = type))+
-    #  geom_line() + labs("All cells on distance filter ON") + 
-    #  xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
-    ggplot(data,aes(x=t,y=autocorr,colour=type)) + 
-      stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) +
-      theme_bw() + xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+    ggplot(data,aes(x=Group.1, y=x,colour = type))+
+      geom_line() + labs("All cells on distance filter ON") + 
+      xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+    #ggplot(data,aes(x=t,y=autocorr,colour=type)) + 
+    #  stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) +
+    #  theme_bw() + xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
     })
+  
+  
+  
+  pt8 <- reactive({
+    if (!(input$type=="first_passage_time_distribution")) return(NULL)
+    
+    if(input$d_filter=="ON"){
+      files_distance12 = list.files(paste0(dir,"/csv/"),pattern = "12distances_filtered.csv",full.names = T)
+      files_distance23 = list.files(paste0(dir,"/csv/"),pattern = "23distances_filtered.csv",full.names = T)
+      files_distance13 = list.files(paste0(dir,"/csv/"),pattern = "13distances_filtered.csv",full.names = T)
+    }else{
+      files_distance12 = list.files(paste0(dir,"/csv/"),pattern = "12distances.csv",full.names = T)
+      files_distance23 = list.files(paste0(dir,"/csv/"),pattern = "23distances.csv",full.names = T)
+      files_distance13 = list.files(paste0(dir,"/csv/"),pattern = "13distances.csv",full.names = T)
+    }
+    
+    data12=NULL
+    for(i in 1:length(files_distance12)){
+      a = read.csv(files_distance12[i])
+      sel = which(a[,2]<input$dist_thresh)
+      if(length(sel)>0){
+        data12 = c(data12,(a[sel[1],1]-a[1,1])*tactual)
+      }
+    }
+    
+    data23=NULL
+    for(i in 1:length(files_distance23)){
+      a = read.csv(files_distance23[i])
+      sel = which(a[,2]<input$dist_thresh)
+      if(length(sel)>0){
+        data23 = c(data23,(a[sel[1],1]-a[1,1])*tactual)
+      }
+    }
+    
+    data13=NULL
+    for(i in 1:length(files_distance13)){
+      a = read.csv(files_distance13[i])
+      sel = which(a[,2]<input$dist_thresh)
+      if(length(sel)>0){
+        data13 = c(data13,(a[sel[1],1]-a[1,1])*tactual)
+      }
+    }
+    
+    data12 = data.frame(fpt = data12)
+    data23 = data.frame(fpt = data23)
+    data13 = data.frame(fpt = data13)
+    
+    data12$type = "Chic vs Tsix"
+    data23$type = "Tsix vs Linx"
+    data13$type = "Chic vs Linx"
+    
+    data = rbind(data12,data23,data13)
+    
+    ggplot(data,aes(fpt,colour = type))+
+      geom_density()+
+      labs("First passage time")
+  })
   
   
   
@@ -504,7 +562,8 @@ server <- function(input, output) {
            "Auto_cross_pairs" = pt4(),
            "MSD" = pt5(),
            "MSD_allCells" = pt6(),
-           "Autocorr_velocity_all_cells" = pt7()
+           "Autocorr_velocity_all_cells" = pt7(),
+           "first_passage_time_distribution" = pt8()
     )
   })
   
