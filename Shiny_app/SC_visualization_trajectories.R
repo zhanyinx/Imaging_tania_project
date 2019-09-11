@@ -399,11 +399,13 @@ server <- function(input, output) {
     }
     
     df = rbind(df1,df2,df3)
+    df$time = log2(df$time)
+    df$disp = log2(df$disp)
     
     ggplot(df,aes(x=time,y=disp,col=type)) + 
       geom_line() +
-      xlab("time (minutes)") +
-      ylab(paste0("MSD on ",input$msd)) +
+      xlab("time (minutes, log2)") +
+      ylab(paste0("MSD on ",input$msd, " um (log2)")) +
       labs(paste0("filter ",input$d_filter))
     
     
@@ -447,9 +449,12 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
+    data$Group.1 = log2(df$Group.1)
+    data$x = log2(df$x)
+    
     ggplot(data,aes(x=Group.1, y=x,colour = type))+
       geom_line() + labs("MSD all cells on distance filter ON") + 
-      xlab("time (minutes)") + ylab("MSD")
+      xlab("time (minutes, log2) ") + ylab("MSD (log2, um)")
     
     #ggplot(data,aes(x=time, y=disp,colour = type))+
     #  stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
