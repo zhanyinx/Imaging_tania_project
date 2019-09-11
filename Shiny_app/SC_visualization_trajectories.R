@@ -65,7 +65,7 @@ ui <- fluidPage(
         selectInput("dimension","2 or 3D", choices = c("3D","2D")),
         selectInput("cell", "Which cell:",  choices=files),
         selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells","first_passage_time_distribution","duration_contact","duration_non_contact")),
-        selectInput("msd", "Type of MSD",  choices=c("position","distance")),
+        selectInput("msd", "Type of MSD",  choices=c("distance","position")),
         selectInput("tres", "time resolution for MSD:",  choices=c((1:50)*tactual)),
         selectInput("dist_thresh", "Threshold on distance for contact (um):",  choices=c((10:50)/100)),
         selectInput("autocorrelation", "Type of autocorrelation:",  choices=c("distance","velocity")),
@@ -449,8 +449,8 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    data$Group.1 = log2(df$Group.1)
-    data$x = log2(df$x)
+    data$Group.1 = log2(data$Group.1)
+    data$x = log2(data$x)
     
     ggplot(data,aes(x=Group.1, y=x,colour = type))+
       geom_line() + labs("MSD all cells on distance filter ON") + 
@@ -526,9 +526,10 @@ server <- function(input, output) {
     data12=NULL
     for(i in 1:length(files_distance12)){
       a = read.csv(files_distance12[i])
-      #find the first timepoint below threshold
+      #find timepoints below threshold
       sel = which(a[,2]<input$dist_thresh)
       if(length(sel)>0){
+        #select the first timepoint and calculate the difference with the time 0
         data12 = c(data12,(a[sel[1],1]-a[1,1])*tactual)
       }
     }
@@ -536,8 +537,10 @@ server <- function(input, output) {
     data23=NULL
     for(i in 1:length(files_distance23)){
       a = read.csv(files_distance23[i])
+      #find timepoints below threshold
       sel = which(a[,2]<input$dist_thresh)
       if(length(sel)>0){
+        #select the first timepoint and calculate the difference with the time 0
         data23 = c(data23,(a[sel[1],1]-a[1,1])*tactual)
       }
     }
@@ -551,6 +554,7 @@ server <- function(input, output) {
       }
     }
     
+    #create dataframe
     data12 = data.frame(fpt = data12)
     data23 = data.frame(fpt = data23)
     data13 = data.frame(fpt = data13)
@@ -584,7 +588,7 @@ server <- function(input, output) {
     data12=NULL
     for(i in 1:length(files_distance12)){
       a = read.csv(files_distance12[i])
-      #find the first timepoint below threshold
+      #find timepoints below threshold
       sel = which(a[,2]<input$dist_thresh)
       
       if(length(sel)>1){
