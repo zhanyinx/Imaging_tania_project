@@ -53,6 +53,7 @@ ui <- fluidPage(
            HTML("<li>Filtering on pair-wise distance is based on speed of movement</li>"),
            HTML("<li>MSD can be done using single channel (position) or using distance between channels (distance)</li>"),
            HTML("<li>MSD calculation can be done using lower in silico time resolution</li>"),
+           HTML("<li>MSD calculation for all the cells is done using the actual time resolution of imaging experiment</li>"),
            HTML("<li>Velocity autocorrelation is based on radial velocity (derivative of distance between two channels)</li>"),
            HTML("<li>Pairs: upper=ccf; diagonal = acf; low=scatter</li><ul>")),
           
@@ -427,9 +428,9 @@ server <- function(input, output) {
       data13 = rbind(data13,a)
     }
     
-    data12 = aggregate(data12$disp,list(data12$time),median)
-    data23 = aggregate(data23$disp,list(data23$time),median)
-    data13 = aggregate(data13$disp,list(data13$time),median)
+    #data12 = aggregate(data12$disp,list(data12$time),median)
+    #data23 = aggregate(data23$disp,list(data23$time),median)
+    #data13 = aggregate(data13$disp,list(data13$time),median)
     
     data12$type = "Chic vs Tsix"
     data23$type = "Tsix vs Linx"
@@ -437,9 +438,14 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
+    #ggplot(data,aes(x=Group.1, y=x,colour = type))+
+    #  geom_line() + labs("MSD all cells on distance filter ON") + 
+    #  xlab("time (minutes)") + ylab("MSD")
+    
     ggplot(data,aes(x=Group.1, y=x,colour = type))+
-      geom_line() + labs("MSD all cells on distance filter ON") + 
+      stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
       xlab("time (minutes)") + ylab("MSD")
+    
   })
   
   
@@ -469,9 +475,9 @@ server <- function(input, output) {
       data13 = rbind(data13,a)
     }
     
-    data12 = aggregate(data12$autocorr,list(data12$t),mean)
-    data23 = aggregate(data23$autocorr,list(data23$t),mean)
-    data13 = aggregate(data13$autocorr,list(data13$t),mean)
+    #data12 = aggregate(data12$autocorr,list(data12$t),mean)
+    #data23 = aggregate(data23$autocorr,list(data23$t),mean)
+    #data13 = aggregate(data13$autocorr,list(data13$t),mean)
     
     data12$type = "Chic vs Tsix"
     data23$type = "Tsix vs Linx"
@@ -479,10 +485,13 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    ggplot(data,aes(x=Group.1, y=x,colour = type))+
-      geom_line() + labs("All cells on distance filter ON") + 
-      xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
-  })
+    #ggplot(data,aes(x=Group.1, y=x,colour = type))+
+    #  geom_line() + labs("All cells on distance filter ON") + 
+    #  xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+    ggplot(data,aes(x=t,y=autocorr,colour=type)) + 
+      stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) +
+      theme_bw() + xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+    })
   
   
   
