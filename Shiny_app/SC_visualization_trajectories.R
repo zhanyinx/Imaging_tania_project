@@ -55,6 +55,7 @@ ui <- fluidPage(
            HTML("<li>MSD calculation can be done using lower in silico time resolution</li>"),
            HTML("<li>MSD calculation for all the cells is done using the actual time resolution of imaging experiment</li>"),
            HTML("<li>Velocity autocorrelation is based on radial velocity (derivative of distance between two channels)</li>"),
+           HTML("<li>First passage time, duration (non) contact are based on all the cells </li>"),
            HTML("<li>Pairs: upper=ccf; diagonal = acf; low=scatter</li><ul>")),
           
    # Sidebar with a slider input for number of bins 
@@ -66,7 +67,7 @@ ui <- fluidPage(
         selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells","first_passage_time_distribution","duration_contact","duration_non_contact")),
         selectInput("msd", "Type of MSD",  choices=c("position","distance")),
         selectInput("tres", "time resolution for MSD:",  choices=c((1:50)*tactual)),
-        selectInput("dist_thresh", "Threshold on distance for contact (um):",  choices=c(0.1,(1:50)/100)),
+        selectInput("dist_thresh", "Threshold on distance for contact (um):",  choices=c((10:50)/100)),
         selectInput("autocorrelation", "Type of autocorrelation:",  choices=c("distance","velocity")),
         selectInput("ymax", "Max value in y axis:",  choices=c(1.5,(1:10)/10,1,2,2.5,3,4,5)),
         downloadButton("downloadData", "Reconstructed trajectory"),
@@ -139,6 +140,9 @@ server <- function(input, output) {
     # 
   })
   
+  
+  ##############################################################################################################################################################################################################################################################################################
+  
   pt2 <- reactive({
     if (!(input$type=="ECDF_all_data")) return(NULL)
     
@@ -183,7 +187,7 @@ server <- function(input, output) {
       labs("Only in 3D by now")
   })
   
-  
+  ##############################################################################################################################################################################################################################################################################################
   
   pt3 <- reactive({
     if (!(input$type=="Gyration_radius")) return(NULL)
@@ -247,6 +251,7 @@ server <- function(input, output) {
     
     })
 
+  ##############################################################################################################################################################################################################################################################################################
   
   pt4 <- reactive({
     if (!(input$type=="Auto_cross_pairs")) return(NULL)
@@ -332,6 +337,8 @@ server <- function(input, output) {
       
   })
   
+  ##############################################################################################################################################################################################################################################################################################
+  
   ##MSD on distances btw loci
   pt5 <- reactive({
     if (!(input$type=="MSD")) return(NULL)
@@ -402,6 +409,7 @@ server <- function(input, output) {
     
     })
   
+  ##############################################################################################################################################################################################################################################################################################
   
   pt6 <- reactive({
     if (!(input$type=="MSD_allCells")) return(NULL)
@@ -439,16 +447,17 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    #ggplot(data,aes(x=Group.1, y=x,colour = type))+
-    #  geom_line() + labs("MSD all cells on distance filter ON") + 
-    #  xlab("time (minutes)") + ylab("MSD")
-    
-    ggplot(data,aes(x=time, y=disp,colour = type))+
-      stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
+    ggplot(data,aes(x=Group.1, y=x,colour = type))+
+      geom_line() + labs("MSD all cells on distance filter ON") + 
       xlab("time (minutes)") + ylab("MSD")
+    
+    #ggplot(data,aes(x=time, y=disp,colour = type))+
+    #  stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
+    #  xlab("time (minutes)") + ylab("MSD")
     
   })
   
+  ##############################################################################################################################################################################################################################################################################################
   
   pt7 <- reactive({
     if (!(input$type=="Autocorr_velocity_all_cells")) return(NULL)
@@ -486,15 +495,15 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    ggplot(data,aes(x=Group.1, y=x,colour = type))+
-      geom_line() + labs("All cells on distance filter ON") + 
-      xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
-    #ggplot(data,aes(x=t,y=autocorr,colour=type)) + 
-    #  stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) +
-    #  theme_bw() + xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+    #ggplot(data,aes(x=Group.1, y=x,colour = type))+
+    #  geom_line() + labs("All cells on distance filter ON") + 
+    #  xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+    ggplot(data,aes(x=t,y=autocorr,colour=type)) + 
+      stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) +
+      theme_bw() + xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
     })
   
-  
+  ##############################################################################################################################################################################################################################################################################################
   
   pt8 <- reactive({
     if (!(input$type=="first_passage_time_distribution")) return(NULL)
@@ -512,6 +521,7 @@ server <- function(input, output) {
     data12=NULL
     for(i in 1:length(files_distance12)){
       a = read.csv(files_distance12[i])
+      #find the first timepoint below threshold
       sel = which(a[,2]<input$dist_thresh)
       if(length(sel)>0){
         data12 = c(data12,(a[sel[1],1]-a[1,1])*tactual)
@@ -548,10 +558,98 @@ server <- function(input, output) {
     
     ggplot(data,aes(fpt,colour = type))+
       geom_density()+
-      labs("First passage time")
+      labs("First passage time") + xlab("time (minutes)")
   })
   
+  ##############################################################################################################################################################################################################################################################################################
   
+  pt9 <- reactive({
+    if (!(input$type=="duration_contact")) return(NULL)
+    
+    if(input$d_filter=="ON"){
+      files_distance12 = list.files(paste0(dir,"/csv/"),pattern = "12distances_filtered.csv",full.names = T)
+      files_distance23 = list.files(paste0(dir,"/csv/"),pattern = "23distances_filtered.csv",full.names = T)
+      files_distance13 = list.files(paste0(dir,"/csv/"),pattern = "13distances_filtered.csv",full.names = T)
+    }else{
+      files_distance12 = list.files(paste0(dir,"/csv/"),pattern = "12distances.csv",full.names = T)
+      files_distance23 = list.files(paste0(dir,"/csv/"),pattern = "23distances.csv",full.names = T)
+      files_distance13 = list.files(paste0(dir,"/csv/"),pattern = "13distances.csv",full.names = T)
+    }
+    
+    data12=NULL
+    for(i in 1:length(files_distance12)){
+      a = read.csv(files_distance12[i])
+      #find the first timepoint below threshold
+      sel = which(a[,2]<input$dist_thresh)
+      
+      if(length(sel)>1){
+        #extract timepoints below threhsolds
+        a = a[sel,]
+        #count number of consecutive timepoints below threhsolds (a true correspond to a pair of consecutive timepoints where distance is below threshold. a false correspond to a single timepoint where it is close)
+        b = rle(diff(a[,1])==tactual)
+        #calculating for each strech of close, the total time being close
+        time_close = (b$lengths[b$value==TRUE]+1)*tactual
+        #number of time they are close for below tactual time (# of falses in b)
+        n = length(sel)-sum(b$lengths[b$value==TRUE])
+        data12 = c(data12,c(time_close,rep(tactual,n)))
+      }
+    }
+    
+    
+    data23=NULL
+    for(i in 1:length(files_distance23)){
+      a = read.csv(files_distance23[i])
+      #find the first timepoint below threshold
+      sel = which(a[,2]<input$dist_thresh)
+      
+      if(length(sel)>1){
+        #extract timepoints below threhsolds
+        a = a[sel,]
+        #count number of consecutive timepoints below threhsolds (a true correspond to a pair of consecutive timepoints where distance is below threshold. a false correspond to a single timepoint where it is close)
+        b = rle(diff(a[,1])==tactual)
+        #calculating for each strech of close, the total time being close
+        time_close = (b$lengths[b$value==TRUE]+1)*tactual
+        #number of time they are close for below tactual time (# of falses in b)
+        n = length(sel)-sum(b$lengths[b$value==TRUE])
+        data23 = c(data23,c(time_close,rep(tactual,n)))
+      }
+    }
+    
+    data13=NULL
+    for(i in 1:length(files_distance13)){
+      a = read.csv(files_distance13[i])
+      #find the first timepoint below threshold
+      sel = which(a[,2]<input$dist_thresh)
+      
+      if(length(sel)>1){
+        #extract timepoints below threhsolds
+        a = a[sel,]
+        #count number of consecutive timepoints below threhsolds (a true correspond to a pair of consecutive timepoints where distance is below threshold. a false correspond to a single timepoint where it is close)
+        b = rle(diff(a[,1])==tactual)
+        #calculating for each strech of close, the total time being close
+        time_close = (b$lengths[b$value==TRUE]+1)*tactual
+        #number of time they are close for below tactual time (# of falses in b)
+        n = length(sel)-sum(b$lengths[b$value==TRUE])
+        data13 = c(data13,c(time_close,rep(tactual,n)))
+      }
+    }
+    
+    data12 = data.frame(duration_contact = data12)
+    data23 = data.frame(duration_contact = data23)
+    data13 = data.frame(duration_contact = data13)
+    
+    data12$type = "Chic vs Tsix"
+    data23$type = "Tsix vs Linx"
+    data13$type = "Chic vs Linx"
+    
+    data = rbind(data12,data23,data13)
+    
+    ggplot(data,aes(duration_contact,colour = type))+
+      geom_density()+
+      labs("Duration_contact") +xlab("duration (in minutes)")
+  })
+  
+  ##############################################################################################################################################################################################################################################################################################
   
   # Return the requested graph
   graphInput <- reactive({
@@ -563,7 +661,8 @@ server <- function(input, output) {
            "MSD" = pt5(),
            "MSD_allCells" = pt6(),
            "Autocorr_velocity_all_cells" = pt7(),
-           "first_passage_time_distribution" = pt8()
+           "first_passage_time_distribution" = pt8(),
+           "duration_contact" = pt9()
     )
   })
   
