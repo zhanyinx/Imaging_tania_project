@@ -218,7 +218,6 @@ server <- function(input, output) {
     
     #calculate Gyration radius (mean((rk-rcm)^2))
     alldata = merge(merge(channel1,channel2,by=1),channel3,by=1)
-    t = alldata[,1] * tactual
     alldata = alldata[,-1]
     
     if(input$dimension == "3D"){
@@ -348,9 +347,6 @@ server <- function(input, output) {
     channel2 = reconstructed_tracks[reconstructed_tracks$channel==channels[2],c(timeColumn,posColumns)]
     channel3 = reconstructed_tracks[reconstructed_tracks$channel==channels[3],c(timeColumn,posColumns)]
     
-    channel1$t = channel1$t*actual
-    channel2$t = channel2$t*actual
-    channel3$t = channel3$t*actual
     
     ##distances between channels  (MUST BE MOFIDIED IF NUMBER OF CHANNELS CHANGES)
     dist_c12 = dist_channels(channel1,channel2)
@@ -397,13 +393,13 @@ server <- function(input, output) {
     }
     
     df = rbind(df1,df2,df3)
-    df$time = log2(df$time)
-    df$disp = log2(df$disp)
+    df$time = log10(df$time)
+    df$disp = log10(df$disp)
     
     ggplot(df,aes(x=time,y=disp,col=type)) + 
-      geom_line() +
-      xlab("time (minutes, log2)") +
-      ylab(paste0("MSD on ",input$msd, " um (log2)")) +
+      geom_line() + geom_point()+
+      xlab("time (minutes, log10)") +
+      ylab(paste0("MSD on ",input$msd, " um (log10)")) +
       labs(paste0("filter ",input$d_filter))
     
     
@@ -447,12 +443,12 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    data$Group.1 = log2(data$Group.1)
-    data$x = log2(data$x)
+    data$Group.1 = log10(data$Group.1)
+    data$x = log10(data$x)
     
     ggplot(data,aes(x=Group.1, y=x,colour = type))+
-      geom_line() + labs("MSD all cells on distance filter ON") + 
-      xlab("time (minutes, log2) ") + ylab("MSD (log2, um)")  + labs("MSD calculated using imaging resolution time")
+      geom_line() + labs("MSD all cells on distance filter ON") + geom_point()+
+      xlab("time (minutes, log10) ") + ylab("MSD (log10, um)")  + labs("MSD calculated using imaging resolution time")
     
     #ggplot(data,aes(x=time, y=disp,colour = type))+
     #  stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
