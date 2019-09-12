@@ -454,7 +454,7 @@ server <- function(input, output) {
     
     ggplot(data,aes(x=Group.1, y=x,colour = type))+
       geom_line() + labs("MSD all cells on distance filter ON") + 
-      xlab("time (minutes, log2) ") + ylab("MSD (log2, um)")
+      xlab("time (minutes, log2) ") + ylab("MSD (log2, um)")  + labs("MSD calculated using imaging resolution time")
     
     #ggplot(data,aes(x=time, y=disp,colour = type))+
     #  stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
@@ -505,7 +505,7 @@ server <- function(input, output) {
     #  xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
     ggplot(data,aes(x=t,y=autocorr,colour=type)) + 
       stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) +
-      theme_bw() + xlab("time delay (minutes)") + ylab("Velocity Autocorrelation")
+      theme_bw() + xlab("time delay (minutes)") + ylab("Velocity Autocorrelation") + labs("velocity calculated using imaging resolution time")
     })
   
   ##############################################################################################################################################################################################################################################################################################
