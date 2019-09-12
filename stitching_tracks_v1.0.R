@@ -168,6 +168,7 @@ for(fileno in 1:length(filelist)){
     
     
     reconstructed_tracks = reconstructed_tracks[order( reconstructed_tracks[,5], reconstructed_tracks[,1] ),]
+    reconstructed_tracks$t = reconstructed_tracks$t*tactual
     reconstructed_tracks$color = as.numeric(gsub("C","",reconstructed_tracks$channel))
     write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_reconstructed_tracks.csv"),x=reconstructed_tracks,row.names = F)
     write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_tracks_used.csv"),x=tracks_used,row.names = F)
@@ -244,9 +245,7 @@ for(fileno in 1:length(filelist)){
   dist_c12 = dist_channels(channel1,channel2)
   dist_c23 = dist_channels(channel2,channel3)
   dist_c13 = dist_channels(channel1,channel3)
-  dist_c12$t = dist_c12$t*tactual
-  dist_c23$t = dist_c23$t*tactual
-  dist_c13$t = dist_c13$t*tactual
+
   
   #saving distances
   write.csv(file = paste0(outputdir,"/csv/",gsub("/","_",filename),"_12distances.csv"),x=dist_c12,row.names = F)

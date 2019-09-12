@@ -101,9 +101,7 @@ server <- function(input, output) {
     dist_c12 = dist_channels(channel1,channel2)
     dist_c23 = dist_channels(channel2,channel3)
     dist_c13 = dist_channels(channel1,channel3)
-    dist_c12$t = dist_c12$t*tactual
-    dist_c23$t = dist_c23$t*tactual
-    dist_c13$t = dist_c13$t*tactual
+
     
     
     #filter
@@ -270,9 +268,6 @@ server <- function(input, output) {
     dist_c12 = dist_channels(channel1,channel2)
     dist_c23 = dist_channels(channel2,channel3)
     dist_c13 = dist_channels(channel1,channel3)
-    dist_c12$t = dist_c12$t*tactual
-    dist_c23$t = dist_c23$t*tactual
-    dist_c13$t = dist_c13$t*tactual
     
     
     #filter
@@ -353,14 +348,17 @@ server <- function(input, output) {
     channel2 = reconstructed_tracks[reconstructed_tracks$channel==channels[2],c(timeColumn,posColumns)]
     channel3 = reconstructed_tracks[reconstructed_tracks$channel==channels[3],c(timeColumn,posColumns)]
     
+    channel1$t = channel1$t*actual
+    channel2$t = channel2$t*actual
+    channel3$t = channel3$t*actual
+    
     ##distances between channels  (MUST BE MOFIDIED IF NUMBER OF CHANNELS CHANGES)
     dist_c12 = dist_channels(channel1,channel2)
     dist_c23 = dist_channels(channel2,channel3)
     dist_c13 = dist_channels(channel1,channel3)
-    dist_c12$t = dist_c12$t*tactual
-    dist_c23$t = dist_c23$t*tactual
-    dist_c13$t = dist_c13$t*tactual
+
     
+
     
     #filter
     if(input$d_filter=="ON"){
@@ -530,7 +528,7 @@ server <- function(input, output) {
       sel = which(a[,2]<input$dist_thresh)
       if(length(sel)>0){
         #select the first timepoint and calculate the difference with the time 0
-        data12 = c(data12,(a[sel[1],1]-a[1,1])*tactual)
+        data12 = c(data12,(a[sel[1],1]-a[1,1]))
       }
     }
     
@@ -541,7 +539,7 @@ server <- function(input, output) {
       sel = which(a[,2]<input$dist_thresh)
       if(length(sel)>0){
         #select the first timepoint and calculate the difference with the time 0
-        data23 = c(data23,(a[sel[1],1]-a[1,1])*tactual)
+        data23 = c(data23,(a[sel[1],1]-a[1,1]))
       }
     }
     
@@ -550,7 +548,7 @@ server <- function(input, output) {
       a = read.csv(files_distance13[i])
       sel = which(a[,2]<input$dist_thresh)
       if(length(sel)>0){
-        data13 = c(data13,(a[sel[1],1]-a[1,1])*tactual)
+        data13 = c(data13,(a[sel[1],1]-a[1,1]))
       }
     }
     
@@ -597,7 +595,7 @@ server <- function(input, output) {
         #count number of consecutive timepoints below threhsolds (a true correspond to a pair of consecutive timepoints where distance is below threshold. a false correspond to a single timepoint where it is close)
         b = rle(diff(a[,1])==tactual)
         #calculating for each strech of close, the total time being close
-        time_close = (b$lengths[b$value==TRUE]+1)*tactual
+        time_close = (b$lengths[b$value==TRUE]+1)
         #number of time they are close for below tactual time (# of falses in b)
         n = length(sel)-sum(b$lengths[b$value==TRUE])
         data12 = c(data12,c(time_close,rep(tactual,n)))
@@ -617,7 +615,7 @@ server <- function(input, output) {
         #count number of consecutive timepoints below threhsolds (a true correspond to a pair of consecutive timepoints where distance is below threshold. a false correspond to a single timepoint where it is close)
         b = rle(diff(a[,1])==tactual)
         #calculating for each strech of close, the total time being close
-        time_close = (b$lengths[b$value==TRUE]+1)*tactual
+        time_close = (b$lengths[b$value==TRUE]+1)
         #number of time they are close for below tactual time (# of falses in b)
         n = length(sel)-sum(b$lengths[b$value==TRUE])
         data23 = c(data23,c(time_close,rep(tactual,n)))
@@ -636,7 +634,7 @@ server <- function(input, output) {
         #count number of consecutive timepoints below threhsolds (a true correspond to a pair of consecutive timepoints where distance is below threshold. a false correspond to a single timepoint where it is close)
         b = rle(diff(a[,1])==tactual)
         #calculating for each strech of close, the total time being close
-        time_close = (b$lengths[b$value==TRUE]+1)*tactual
+        time_close = (b$lengths[b$value==TRUE]+1)
         #number of time they are close for below tactual time (# of falses in b)
         n = length(sel)-sum(b$lengths[b$value==TRUE])
         data13 = c(data13,c(time_close,rep(tactual,n)))
@@ -696,9 +694,7 @@ server <- function(input, output) {
     dist_c12 = dist_channels(channel1,channel2)
     dist_c23 = dist_channels(channel2,channel3)
     dist_c13 = dist_channels(channel1,channel3)
-    dist_c12$t = dist_c12$t*tactual
-    dist_c23$t = dist_c23$t*tactual
-    dist_c13$t = dist_c13$t*tactual
+
     
     
     #filter
