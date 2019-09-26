@@ -22,7 +22,7 @@ tactual = 0.5 #minutes
 melements = 10 #minimum timepoints for msd calculation 
 mdelay = 150 # maximum delay
 sigma_threshold = 4 #how many standard deviation away from the mean of the derivative of distance with respect to time to exclude because of wrong stitching
-dir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj/" 
+dir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells//results_analysis_corrected_traj//" 
 #dir_uncorrected = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj" 
 #end
 
@@ -559,8 +559,8 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    ggplot(data,aes(fpt,colour = type))+
-      geom_density()+
+    ggplot(data,aes(fpt,colour = type,fill=type,alpha=0.3))+
+      geom_histogram(alpha=0.3)+
       labs("First passage time") + xlab("time (minutes)")
   })
   
@@ -647,8 +647,8 @@ server <- function(input, output) {
     
     data = rbind(data12,data23,data13)
     
-    ggplot(data,aes(duration_contact,colour = type))+
-      geom_density()+
+    ggplot(data,aes(duration_contact,colour = type,fill=type,alpha=0.3))+
+      geom_histogram(alpha=0.3)+
       labs("Duration_contact") +xlab("duration (in minutes)")
   })
   

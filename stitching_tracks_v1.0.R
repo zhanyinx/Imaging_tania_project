@@ -7,15 +7,15 @@
 ###Set working directory
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 source("functions_v0.R")
-library(plot3D)
+library(plot3D,lib="/tungstenfs/scratch/ggiorget/zhan/R_libraries/")
 library(reshape2)
 library(plotly)
 
 ###Global options (you can touch)
 ####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
-dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/Corrected_traj/2h_movies/" #set the filepath to files you are intested in
+dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/Corrected_traj/2h_movies/" #set the filepath to files you are intested in
 ##directory containing analysis result, must contain csv directory and pdf directory
-outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj/" 
+outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/results_analysis_corrected_traj/" 
 
 
 trackColumn = 7 #corresponds to column with TRACKID information 
@@ -46,6 +46,7 @@ sigma_threshold = 4 #how many standard deviation away from the mean of the deriv
 ###Import data file and make it useful for working in R (this could be prettier)
 filelist = list.files(path=dirpath, pattern="\\.csv$",recursive = TRUE)
 for(fileno in 1:length(filelist)){
+  
   filename = filelist[fileno]
   traj <- read.csv(file = paste(dirpath,filename, sep=""), sep = ",", header = TRUE)
   #clean up some of the dataset columns
@@ -180,16 +181,16 @@ for(fileno in 1:length(filelist)){
   
 
   
-  # ##plot 3D trajectories
-  # plot_ly(reconstructed_tracks, x = ~x, y = ~y, z = ~z, split = ~color ,type = 'scatter3d', mode = 'lines',
-  #         line = list(width = 2))%>%
-  #   layout(
-  #     title = channels[ch],
-  #     scene = list(
-  #       xaxis = list(title = "X position"),
-  #       yaxis = list(title = "Y position"),
-  #      zaxis = list(title = "Z position")
-  #     ))
+  # # ##plot 3D trajectories
+  plot_ly(reconstructed_tracks, x = ~x, y = ~y, z = ~z, split = ~color ,type = 'scatter3d', mode = 'lines',
+          line = list(width = 2))%>%
+    layout(
+      title = channels[ch],
+      scene = list(
+        xaxis = list(title = "X position"),
+        yaxis = list(title = "Y position"),
+       zaxis = list(title = "Z position")
+      ))
   
   
   
