@@ -218,6 +218,7 @@ server <- function(input, output) {
     
     #calculate Gyration radius (mean((rk-rcm)^2))
     alldata = merge(merge(channel1,channel2,by=1),channel3,by=1)
+    t=alldata[,1]
     alldata = alldata[,-1]
     
     if(input$dimension == "3D"){
