@@ -117,8 +117,8 @@ server <- function(input, output) {
       dist_c13 = dist_c13[!(dist_c13$t %in% filter), ]
     }
     
-    dist_c12$type = "Chic vs Tsix"
-    dist_c23$type = "Tsix vs Linx"
+    dist_c12$type = "Chic vs Xite"
+    dist_c23$type = "Xite vs Linx"
     dist_c13$type = "Chic vs Linx"
     
     data = rbind(dist_c12,dist_c23,dist_c13)
@@ -134,7 +134,7 @@ server <- function(input, output) {
     # plot(dist_c12[,c(1,2)],type="l",ylim=c(0,2), ylab="Distance in µm", xlab="t in min", main=paste0(input$dimension, " Pair-wise_distances filter ",input$d_filter), col=3)
     # lines(dist_c23[,c(1,2)],type="l",col=4)
     # lines(dist_c13[,c(1,2)],type="l",col=2)
-    # legend(x="topright",legend=c("Chic vs Tsix","Tsix vs Linx","Chic vs Linx"),col=c(3,4,2),lty=c(1,1))
+    # legend(x="topright",legend=c("Chic vs Xite","Xite vs Linx","Chic vs Linx"),col=c(3,4,2),lty=c(1,1))
     # 
   })
   
@@ -173,8 +173,8 @@ server <- function(input, output) {
     }
     
     
-    data12$type = "Chic vs Tsix"
-    data23$type = "Tsix vs Linx"
+    data12$type = "Chic vs Xite"
+    data23$type = "Xite vs Linx"
     data13$type = "Chic vs Linx"
     
     data = rbind(data12,data23,data13)
@@ -286,7 +286,7 @@ server <- function(input, output) {
     a = merge(merge(dist_c12,dist_c13,by=1),dist_c23,by=1)
     time = a[,1]
     a = a[,-1]
-    colnames(a)= c("Chic vs Tsix","Chic vs Linx","Tsix vs Linx")
+    colnames(a)= c("Chic vs Xite","Chic vs Linx","Xite vs Linx")
     
     #auto correlation
     diagonal.acf = function(x){
@@ -370,8 +370,8 @@ server <- function(input, output) {
       dist_c13 = dist_c13[!(dist_c13$t %in% filter), ]
     }
     
-    dist_c12$type = "Chic vs Tsix"
-    dist_c23$type = "Tsix vs Linx"
+    dist_c12$type = "Chic vs Xite"
+    dist_c23$type = "Xite vs Linx"
     dist_c13$type = "Chic vs Linx"
     
     if(input$msd=="position"){
@@ -379,16 +379,16 @@ server <- function(input, output) {
       df1 = calculate_msd_trajectory(channel1,poscolumns,input$tres,mdelay,melements)
       df1$type = "Chic1"
       df2 = calculate_msd_trajectory(channel2,poscolumns,input$tres,mdelay,melements) 
-      df2$type = "Tsix"
+      df2$type = "Xite"
       df3 = calculate_msd_trajectory(channel3,poscolumns,input$tres,mdelay,melements) 
       df3$type = "Linx"
     }
     if(input$msd=="distance"){
       poscolumns=2
       df1 = calculate_msd_trajectory(dist_c12,poscolumns,input$tres,mdelay,melements) 
-      df1$type = "Chic vs Tsix"
+      df1$type = "Chic vs Xite"
       df2 = calculate_msd_trajectory(dist_c23,poscolumns,input$tres,mdelay,melements) 
-      df2$type = "Tsix vs Linx"
+      df2$type = "Xite vs Linx"
       df3 = calculate_msd_trajectory(dist_c13,poscolumns,input$tres,mdelay,melements) 
       df3$type = "Chic vs Linx"
     }
@@ -438,8 +438,8 @@ server <- function(input, output) {
     data23 = aggregate(data23$disp,list(data23$time),median)
     data13 = aggregate(data13$disp,list(data13$time),median)
     
-    data12$type = "Chic vs Tsix"
-    data23$type = "Tsix vs Linx"
+    data12$type = "Chic vs Xite"
+    data23$type = "Xite vs Linx"
     data13$type = "Chic vs Linx"
     
     data = rbind(data12,data23,data13)
@@ -489,8 +489,8 @@ server <- function(input, output) {
     #data23 = aggregate(data23$autocorr,list(data23$t),mean)
     #data13 = aggregate(data13$autocorr,list(data13$t),mean)
     
-    data12$type = "Chic vs Tsix"
-    data23$type = "Tsix vs Linx"
+    data12$type = "Chic vs Xite"
+    data23$type = "Xite vs Linx"
     data13$type = "Chic vs Linx"
     
     data = rbind(data12,data23,data13)
@@ -554,8 +554,8 @@ server <- function(input, output) {
     data23 = data.frame(fpt = data23)
     data13 = data.frame(fpt = data13)
     
-    data12$type = "Chic vs Tsix"
-    data23$type = "Tsix vs Linx"
+    data12$type = "Chic vs Xite"
+    data23$type = "Xite vs Linx"
     data13$type = "Chic vs Linx"
     
     data = rbind(data12,data23,data13)
@@ -642,8 +642,8 @@ server <- function(input, output) {
     data23 = data.frame(duration_contact = data23)
     data13 = data.frame(duration_contact = data13)
     
-    data12$type = "Chic vs Tsix"
-    data23$type = "Tsix vs Linx"
+    data12$type = "Chic vs Xite"
+    data23$type = "Xite vs Linx"
     data13$type = "Chic vs Linx"
     
     data = rbind(data12,data23,data13)
