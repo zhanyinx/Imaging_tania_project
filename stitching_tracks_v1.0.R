@@ -13,9 +13,9 @@ library(plotly)
 
 ###Global options (you can touch)
 ####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
-dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/Corrected_traj/2h_movies/" #set the filepath to files you are intested in
+dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/Corrected_traj/1h15s_movies//" #set the filepath to files you are intested in
 ##directory containing analysis result, must contain csv directory and pdf directory
-outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/results_analysis_corrected_traj/" 
+outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/results_analysis_corrected_traj/1h15s_movies/" 
 
 
 trackColumn = 7 #corresponds to column with TRACKID information 
@@ -23,8 +23,8 @@ timeColumn = 1 # corresponds to column with time position information
 posColumns = 2:4 #columns correpsonding to the x,y,z position
 channelColumn = 6 #corresponds to the column assigning the channel
 #### SET FOR EVERY NEW DATASET!!! ####
-tactual = 0.5 #what is the time interval in min SET FOR EVERY NEW DATASET!!!!
-tres = 0.5 # in silico changing resolution in time
+tactual = 0.25 #what is the time interval in min SET FOR EVERY NEW DATASET!!!!
+tres = 0.25 # in silico changing resolution in time
 mdelay = 150 # maximum delay 
 melements = 10 #minimum elements for calculation of MSD
 overlap = 0.8 #how much of a new track must be unique (not overlapping with any other track) as fraction
@@ -35,7 +35,6 @@ t_dist_chan = 1 #threshold to penalize distance between different channels at ce
 t_dist_inchan = 1 # threshold to penalize distance within the same channel between different tracks
 t_dist_time = 1 # threshold to penalize distance in time between tracks in the same channel
 numtrack = 3 # threshold to decide on the minimum length of track that should be included
-
 
 sigma_threshold = 4 #how many standard deviation away from the mean of the derivative of distance with respect to time to exclude because of wrong stitching
 ##end global options

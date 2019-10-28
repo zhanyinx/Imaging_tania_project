@@ -18,11 +18,11 @@ library(plotly)
 library(reshape2)
 ##global options
 timeColumn = 1 # corresponds to column with time position information
-tactual = 0.5 #minutes
+tactual = 1 #minutes
 melements = 10 #minimum timepoints for msd calculation 
 mdelay = 150 # maximum delay
 sigma_threshold = 4 #how many standard deviation away from the mean of the derivative of distance with respect to time to exclude because of wrong stitching
-dir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells//results_analysis_corrected_traj//" 
+dir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells//results_analysis_corrected_traj/2h30s_movies/" 
 #dir_uncorrected = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj" 
 #end
 
@@ -64,7 +64,7 @@ ui <- fluidPage(
         selectInput("d_filter", "Filter (movement)",  choices=c("ON","OFF")),
         selectInput("dimension","2 or 3D", choices = c("3D","2D")),
         selectInput("cell", "Which cell:",  choices=files),
-        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells","first_passage_time_distribution","duration_contact","duration_non_contact")),
+        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells","first_passage_time_distribution","duration_contact")),
         selectInput("msd", "Type of MSD",  choices=c("distance","position")),
         selectInput("tres", "time resolution for MSD:",  choices=c((1:50)*tactual)),
         selectInput("dist_thresh", "Threshold on distance for contact (um):",  choices=c((10:50)/100)),
