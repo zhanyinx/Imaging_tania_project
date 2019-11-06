@@ -16,13 +16,14 @@ library(shiny)
 library(ggplot2)
 library(plotly)
 library(reshape2)
+library(gridExtra)
 ##global options
 timeColumn = 1 # corresponds to column with time position information
-tactual = 1 #minutes
 melements = 10 #minimum timepoints for msd calculation 
 mdelay = 150 # maximum delay
-sigma_threshold = 4 #how many standard deviation away from the mean of the derivative of distance with respect to time to exclude because of wrong stitching
+sigma_threshold = 3 #how many standard deviation away from the mean of the derivative of distance with respect to time to                                                     exclude because of wrong stitching
 dir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells//results_analysis_corrected_traj/2h30s_movies/" 
+tactual = 0.5 #minutes
 #dir_uncorrected = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/PGK_G8_A11_B3_F6_SingleCells/results_analysis_corrected_traj" 
 #end
 
@@ -64,7 +65,7 @@ ui <- fluidPage(
         selectInput("d_filter", "Filter (movement)",  choices=c("ON","OFF")),
         selectInput("dimension","2 or 3D", choices = c("3D","2D")),
         selectInput("cell", "Which cell:",  choices=files),
-        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","MSD","MSD_allCells","Autocorr_velocity_all_cells","first_passage_time_distribution","duration_contact")),
+        selectInput("type", "Which Plot",  choices=c("Pair-wise_dist","ECDF_all_data","Gyration_radius","Auto_cross_pairs","Auto_cross_pairs_allcells","MSD","MSD_allCells","Autocorr_velocity_all_cells","first_passage_time_distribution","duration_contact")),
         selectInput("msd", "Type of MSD",  choices=c("distance","position")),
         selectInput("tres", "time resolution for MSD:",  choices=c((1:50)*tactual)),
         selectInput("dist_thresh", "Threshold on distance for contact (um):",  choices=c((10:50)/100)),
@@ -106,15 +107,18 @@ server <- function(input, output) {
     
     #filter
     if(input$d_filter=="ON"){
-      filter = NULL
-      filter = c(filter,derivative_filter(dist_c12,sigma_threshold))
-      filter = c(filter,derivative_filter(dist_c23,sigma_threshold))
-      filter = c(filter,derivative_filter(dist_c13,sigma_threshold))
-      filter = unique(filter)
-      
-      dist_c12 = dist_c12[!(dist_c12$t %in% filter), ]
-      dist_c23 = dist_c23[!(dist_c23$t %in% filter), ]
-      dist_c13 = dist_c13[!(dist_c13$t %in% filter), ]
+      repeat{
+        filter = NULL
+        filter = c(filter,derivative_filter(dist_c12,sigma_threshold))
+        filter = c(filter,derivative_filter(dist_c23,sigma_threshold))
+        filter = c(filter,derivative_filter(dist_c13,sigma_threshold))
+        filter = unique(filter)
+        
+        dist_c12 = dist_c12[!(dist_c12$t %in% filter), ]
+        dist_c23 = dist_c23[!(dist_c23$t %in% filter), ]
+        dist_c13 = dist_c13[!(dist_c13$t %in% filter), ]
+        if(length(filter)==0){break}
+      }
     }
     
     dist_c12$type = "Chic vs Xite"
@@ -438,6 +442,26 @@ server <- function(input, output) {
     data23 = aggregate(data23$disp,list(data23$time),median)
     data13 = aggregate(data13$disp,list(data13$time),median)
     
+    # select = log10(data12$Group.1)<1.5
+    # fit = lm(log10(data12$x)[select]~log10(data12$Group.1)[select])
+    # plot(log10(data12$Group.1)[select],log10(data12$x)[select])
+    # lines(log10(data12$Group.1)[select],predict(fit)[select],col=2)
+    # fit$coefficients[[2]]
+    # 
+    # select = log10(data23$Group.1)<1.5
+    # fit = lm(log10(data23$x)[select]~log10(data23$Group.1)[select])
+    # plot(log10(data23$Group.1)[select],log10(data23$x)[select])
+    # lines(log10(data23$Group.1)[select],predict(fit)[select],col=2)
+    # fit$coefficients[[2]]
+    # 
+    # 
+    # select = log10(data13$Group.1)<1.5
+    # fit = lm(log10(data13$x)[select]~log10(data13$Group.1)[select])
+    # plot(log10(data13$Group.1)[select],log10(data13$x)[select])
+    # lines(log10(data13$Group.1)[select],predict(fit)[select],col=2)
+    # fit$coefficients[[2]]
+    
+    
     data12$type = "Chic vs Xite"
     data23$type = "Xite vs Linx"
     data13$type = "Chic vs Linx"
@@ -446,14 +470,16 @@ server <- function(input, output) {
     
     data$Group.1 = log10(data$Group.1)
     data$x = log10(data$x)
+    # data$time = log10(data$time)
+    # data$disp = log10(data$disp)
     
     ggplot(data,aes(x=Group.1, y=x,colour = type))+
       geom_line() + labs("MSD all cells on distance filter ON") + geom_point()+
       xlab("time (minutes, log10) ") + ylab("MSD (log10, um)")  + labs("MSD calculated using imaging resolution time")
     
-    #ggplot(data,aes(x=time, y=disp,colour = type))+
-    #  stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + labs("MSD all cells on distance filter ON") + 
-    #  xlab("time (minutes)") + ylab("MSD")
+    # ggplot(data,aes(x=time, y=disp,colour = type))+
+    #   stat_smooth(method="loess", span=1, se=TRUE, alpha=0.3) + labs("MSD all cells on distance filter ON") + 
+    #   xlab("time (minutes)") + ylab("MSD")
     
   })
   
@@ -653,6 +679,119 @@ server <- function(input, output) {
       labs("Duration_contact") +xlab("duration (in minutes)")
   })
   
+  
+  
+  ##############################################################################################################################################################################################################################################################################################
+  
+  pt10 <- reactive({
+    if (!(input$type=="Auto_cross_pairs_allcells")) return(NULL)
+    #auto correlation
+    my_acf = function(x){
+      appo=NULL
+      for(i in 1:ncol(x)){
+        appo = cbind(appo,acf(x[,i],plot=FALSE)[[1]])
+      }
+      appo = data.frame(appo)
+      
+      for(i in 1:ncol(x)){
+        colnames(appo)[i] = colnames(x)[i]
+      }
+      appo$time=time[1:length(appo[[1]])]-min(time)
+      return(appo)
+    }
+    
+    
+    #cross correlation
+    my_ccf = function(x){
+      cross = NULL
+      for(col1 in 1:ncol(x)){
+        for(col2 in (col1):ncol(x)){
+          if(col2!=col1){
+            auto = ccf(x[,col1],x[,col2],plot=FALSE)
+            cross = cbind(cross,auto[[1]])
+          }
+        }
+      }
+      cross = data.frame(cross)
+      conta=1
+      for(col1 in 1:ncol(x)){
+        for(col2 in (col1):ncol(x)){
+          if(col2!=col1){
+            colnames(cross)[conta]= paste0(colnames(x)[col1]," vs ",colnames(x)[col2])
+            conta=conta+1
+          }
+        }
+      }
+      cross$time = c(sort(-time[1:(as.integer(length(auto[[1]])/2)+1)]),
+                     time[(1:as.integer(length(auto[[1]])/2))+1]-min(time))
+      return(cross)
+    }
+    
+    ##
+    if(input$dimension == "3D"){ posColumns = 2:4}else{posColumns = 2:3 } #columns correpsonding to the x,y,z position
+    
+    #read data
+    tracks = list.files(paste0(dir,"/csv/"),pattern = "_reconstructed_tracks.csv",full.names = T)
+    auto=NULL
+    cross=NULL
+    for(files in tracks){
+      reconstructed_tracks = read.csv(files)
+      channels = names(table(reconstructed_tracks$channel))
+      
+      ####### separate tracks by channels  (MUST BE MOFIDIED IF NUMBER OF CHANNELS CHANGES)
+      channel1 = reconstructed_tracks[reconstructed_tracks$channel==channels[1],c(timeColumn,posColumns)]
+      channel2 = reconstructed_tracks[reconstructed_tracks$channel==channels[2],c(timeColumn,posColumns)]
+      channel3 = reconstructed_tracks[reconstructed_tracks$channel==channels[3],c(timeColumn,posColumns)]
+      
+      ##distances between channels  (MUST BE MOFIDIED IF NUMBER OF CHANNELS CHANGES)
+      dist_c12 = dist_channels(channel1,channel2)
+      dist_c23 = dist_channels(channel2,channel3)
+      dist_c13 = dist_channels(channel1,channel3)
+      
+      
+      #filter
+      if(input$d_filter=="ON"){
+        filter = NULL
+        filter = c(filter,derivative_filter(dist_c12,sigma_threshold))
+        filter = c(filter,derivative_filter(dist_c23,sigma_threshold))
+        filter = c(filter,derivative_filter(dist_c13,sigma_threshold))
+        filter = unique(filter)
+        
+        dist_c12 = dist_c12[!(dist_c12$t %in% filter), ]
+        dist_c23 = dist_c23[!(dist_c23$t %in% filter), ]
+        dist_c13 = dist_c13[!(dist_c13$t %in% filter), ]
+      }
+      
+
+      a = merge(merge(dist_c12,dist_c13,by=1),dist_c23,by=1)
+      time = a[,1]
+      a = a[,-1]
+      colnames(a)= c("Chic-Xite","Chic-Linx","Xite-Linx")
+      auto = rbind(auto,my_acf(a))
+      cross = rbind(cross,my_ccf(a))
+    }
+    
+    av_auto = NULL
+    for(i in 1:(ncol(auto)-1)){
+      appo = aggregate(auto[,i],list(auto[,ncol(auto)]),mean)
+      appo$type=rep(colnames(auto)[i],nrow(appo))
+      av_auto = rbind(av_auto,appo)
+    }
+
+    
+    
+    av_cross = NULL
+    for(i in 1:(ncol(cross)-1)){
+      appo = aggregate(cross[,i],list(cross[,ncol(cross)]),mean)
+      appo$type=rep(colnames(cross)[i],nrow(appo))
+      av_cross = rbind(av_cross,appo)
+    }
+    
+    p1 = ggplot(av_cross,aes(x=Group.1,y=x,col=type)) + geom_line() + xlim(-20,20) + xlab("delay (minutes)") + ylab("cross correlation")
+    p2 = ggplot(av_auto,aes(x=Group.1,y=x,col=type)) + geom_line() + xlim(0,30) + xlab("delay (minutes)") + ylab("Auto correlation")
+    grid.arrange(p1, p2, nrow = 2)
+    
+  })
   ##############################################################################################################################################################################################################################################################################################
   
   # Return the requested graph
@@ -666,7 +805,8 @@ server <- function(input, output) {
            "MSD_allCells" = pt6(),
            "Autocorr_velocity_all_cells" = pt7(),
            "first_passage_time_distribution" = pt8(),
-           "duration_contact" = pt9()
+           "duration_contact" = pt9(),
+           "Auto_cross_pairs_allcells"=pt10()
     )
   })
   

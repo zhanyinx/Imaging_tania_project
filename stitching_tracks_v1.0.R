@@ -13,9 +13,11 @@ library(plotly)
 
 ###Global options (you can touch)
 ####CHOOSE DATASET HERE BY CHOOSING FILEPATH:
-dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/Corrected_traj/1h15s_movies//" #set the filepath to files you are intested in
+dirpath = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/Corrected_traj/2h30s_movies_zhan/" #set the filepath to files you are intested in
 ##directory containing analysis result, must contain csv directory and pdf directory
-outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/results_analysis_corrected_traj/1h15s_movies/" 
+outputdir = "/tungstenfs/scratch/ggiorget/_LIVECELL/Analysis_Data/F6_FullSeq_SingleCells/results_analysis_corrected_traj/2h30s_movies/" 
+tactual = 0.5 #what is the time interval in min SET FOR EVERY NEW DATASET!!!!
+tres = 0.5 # in silico changing resolution in time
 
 
 trackColumn = 7 #corresponds to column with TRACKID information 
@@ -23,8 +25,6 @@ timeColumn = 1 # corresponds to column with time position information
 posColumns = 2:4 #columns correpsonding to the x,y,z position
 channelColumn = 6 #corresponds to the column assigning the channel
 #### SET FOR EVERY NEW DATASET!!! ####
-tactual = 0.25 #what is the time interval in min SET FOR EVERY NEW DATASET!!!!
-tres = 0.25 # in silico changing resolution in time
 mdelay = 150 # maximum delay 
 melements = 10 #minimum elements for calculation of MSD
 overlap = 0.8 #how much of a new track must be unique (not overlapping with any other track) as fraction
