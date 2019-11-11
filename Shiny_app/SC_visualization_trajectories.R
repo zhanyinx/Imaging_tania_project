@@ -787,8 +787,8 @@ server <- function(input, output) {
       av_cross = rbind(av_cross,appo)
     }
     
-    p1 = ggplot(av_cross,aes(x=Group.1,y=x,col=type)) + geom_line() + xlim(-20,20) + xlab("delay (minutes)") + ylab("cross correlation")
-    p2 = ggplot(av_auto,aes(x=Group.1,y=x,col=type)) + geom_line() + xlim(0,30) + xlab("delay (minutes)") + ylab("Auto correlation")
+    p1 = ggplot(av_cross,aes(x=Group.1,y=x,col=type)) + stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + xlim(-20,20) + xlab("delay (minutes)") + ylab("cross correlation")
+    p2 = ggplot(av_auto,aes(x=Group.1,y=x,col=type)) + stat_smooth(method="loess", span=0.1, se=TRUE, aes(fill=type), alpha=0.3) + xlim(0,30) + xlab("delay (minutes)") + ylab("Auto correlation")
     grid.arrange(p1, p2, nrow = 2)
     
   })
